@@ -1,9 +1,19 @@
+/**
+ * TODO: 
+ * - When finished book refactor App.js (page 132)
+ */
+
 import React, { Component } from 'react';
 import axios from 'axios';
+import Enzyme from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+import PropTypes from 'prop-types';
 import Search from "./Search";
 import Table from "./Table";
 import './App.css';
 import Button from "./Button";
+
+Enzyme.configure({adapter: new Adapter()});
 
 // API query request
 const DEFAULT_QUERY = 'redux';
@@ -17,6 +27,8 @@ const PARAM_HPP='hitsPerPage=';
 
 
 class App extends Component {
+	_isMounted = false;
+
 	constructor(props) {
 		super(props);
 
@@ -61,9 +73,15 @@ class App extends Component {
 	}
 
 	componentDidMount() {
+		this._isMounted = true;
+
 		const {searchTerm} = this.state;
 		this.setState({searchKey: searchTerm});
 		this.fetchSearchTopStories(searchTerm);
+	}
+
+	componentWillUnmount() {
+		this._isMounted = false;
 	}
 
 
@@ -80,8 +98,8 @@ class App extends Component {
 	fetchSearchTopStories(searchTerm, page = 0) {
 		console.log("Making API request...");
 		axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
-			.then(result => this.setSearchTopStories(result.data))
-			.catch(error => this.setState({error}));
+			.then(result => this._isMounted && this.setSearchTopStories(result.data))
+			.catch(error => this._isMounted && this.setState({ error }));
 	}
 
 	// Update the state with search value
