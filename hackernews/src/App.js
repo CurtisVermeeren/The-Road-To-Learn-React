@@ -27,6 +27,24 @@ const withLoading = (Component) => ({isLoading, ...rest}) =>
 
 const ButtonWithLoading = withLoading(Button);
 
+const updateSearchTopStoriesState = (hits, page) => (prevState) => {
+	const { searchKey, results } = prevState;
+	const oldHits = results && results[searchKey]
+		? results[searchKey].hits
+		: [];
+	const updatedHits = [
+		...oldHits,
+		...hits
+	];
+	return {
+		results: {
+			...results,
+			[searchKey]: { hits: updatedHits, page }
+		},
+		isLoading: false
+	};
+};
+
 class App extends Component {
 	_isMounted = false;
 
@@ -39,8 +57,6 @@ class App extends Component {
 			searchTerm: DEFAULT_QUERY,
 			error: null,
 			isLoading: false,
-			sortKey: 'NONE',
-			isSortReverse: false,
 		};
 
 		this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -49,12 +65,6 @@ class App extends Component {
 		this.onSearchChange = this.onSearchChange.bind(this);
 		this.onSearchSubmit = this.onSearchSubmit.bind(this);
 		this.onDismiss = this.onDismiss.bind(this);
-		this.onSort = this.onSort.bind(this);
-	}
-
-	onSort(sortKey){
-		const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
-		this.setState({sortKey, isSortReverse});
 	}
 
 	needsToSearchTopStories(searchTerm) {
@@ -64,23 +74,7 @@ class App extends Component {
 	// Update the result value
 	setSearchTopStories(result) {
 		const {hits, page} = result;
-		const {searchKey, results} = this.state;
-
-		const oldHits = results && results[searchKey] 
-			? results[searchKey].hits
-			: [];
-		
-		const updatedHits = [
-			...oldHits,
-			...hits,
-		];
-		this.setState({
-			results: {
-				...results,
-				[searchKey]: {hits: updatedHits, page}
-			},
-			isLoading: false,
-		});
+		this.setState(updateSearchTopStoriesState(hits, page));
 	}
 
 	componentDidMount() {
@@ -108,7 +102,6 @@ class App extends Component {
 	// Make a request to the api with search term and page number
 	fetchSearchTopStories(searchTerm, page = 0) {
 		this.setState({isLoading: true});
-		console.log("Making API request...");
 		axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
 			.then(result => this._isMounted && this.setSearchTopStories(result.data))
 			.catch(error => this._isMounted && this.setState({ error }));
@@ -172,9 +165,6 @@ class App extends Component {
 					</div>
 				: <Table 
 					list={list}
-					sortKey={sortKey}
-					isSortReverse={isSortReverse}
-					onSort={this.onSort}
 					onDismiss={this.onDismiss}
 				/>
 				}
