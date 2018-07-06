@@ -1,17 +1,14 @@
-/**
- * TODO: 
- * - When finished book refactor App.js (page 132)
- */
-
 import React, { Component } from 'react';
 import axios from 'axios';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import PropTypes from 'prop-types';
+
 import Search from "./Search";
 import Table from "./Table";
-import './App.css';
 import Button from "./Button";
+import Loading from "./Loading";
+
+import './App.css';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -25,6 +22,10 @@ const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
 const PARAM_HPP='hitsPerPage=';
 
+const withLoading = (Component) => ({isLoading, ...rest}) => 
+	isLoading ? <Loading /> : <Component {...rest} />
+
+const ButtonWithLoading = withLoading(Button);
 
 class App extends Component {
 	_isMounted = false;
@@ -37,6 +38,9 @@ class App extends Component {
 			searchKey: '',
 			searchTerm: DEFAULT_QUERY,
 			error: null,
+			isLoading: false,
+			sortKey: 'NONE',
+			isSortReverse: false,
 		};
 
 		this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -45,6 +49,12 @@ class App extends Component {
 		this.onSearchChange = this.onSearchChange.bind(this);
 		this.onSearchSubmit = this.onSearchSubmit.bind(this);
 		this.onDismiss = this.onDismiss.bind(this);
+		this.onSort = this.onSort.bind(this);
+	}
+
+	onSort(sortKey){
+		const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
+		this.setState({sortKey, isSortReverse});
 	}
 
 	needsToSearchTopStories(searchTerm) {
@@ -68,7 +78,8 @@ class App extends Component {
 			results: {
 				...results,
 				[searchKey]: {hits: updatedHits, page}
-			}
+			},
+			isLoading: false,
 		});
 	}
 
@@ -96,6 +107,7 @@ class App extends Component {
 
 	// Make a request to the api with search term and page number
 	fetchSearchTopStories(searchTerm, page = 0) {
+		this.setState({isLoading: true});
 		console.log("Making API request...");
 		axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
 			.then(result => this._isMounted && this.setSearchTopStories(result.data))
@@ -127,6 +139,9 @@ class App extends Component {
 			results,
 			searchKey,
 			error,
+			isLoading,
+			sortKey,
+			isSortReverse,
 		} = this.state;
 
 		const page = (
@@ -157,13 +172,18 @@ class App extends Component {
 					</div>
 				: <Table 
 					list={list}
+					sortKey={sortKey}
+					isSortReverse={isSortReverse}
+					onSort={this.onSort}
 					onDismiss={this.onDismiss}
 				/>
 				}
 				<div className="interactions">
-					<Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
+					<ButtonWithLoading
+						isLoading={isLoading}
+						onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
 						More
-					</Button>
+					</ButtonWithLoading>
 				</div>
 			</div>
 		);
