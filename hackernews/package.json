@@ -5,11 +5,12 @@
   "dependencies": {
     "axios": "^0.18.0",
     "classnames": "^2.2.6",
-    "lodash": "^4.17.10",
-    "prop-types": "^15.6.2",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
-    "react-scripts": "1.1.4"
+    "lodash": "^4.17.11",
+    "prop-types": "^15.7.1",
+    "react": "^16.8.1",
+    "react-dev-tools": "0.0.1",
+    "react-dom": "^16.8.1",
+    "react-scripts": "^2.1.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -18,9 +19,9 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.9.1",
     "react-addons-test-utils": "^15.6.2",
-    "react-test-renderer": "^16.4.1"
+    "react-test-renderer": "^16.8.1"
   }
 }
