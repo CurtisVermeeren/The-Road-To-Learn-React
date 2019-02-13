@@ -133,8 +133,6 @@ class App extends Component {
 			searchKey,
 			error,
 			isLoading,
-			sortKey,
-			isSortReverse,
 		} = this.state;
 
 		const page = (
