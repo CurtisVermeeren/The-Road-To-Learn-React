@@ -23,5 +23,11 @@
     "enzyme-adapter-react-16": "^1.9.1",
     "react-addons-test-utils": "^15.6.2",
     "react-test-renderer": "^16.8.1"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
